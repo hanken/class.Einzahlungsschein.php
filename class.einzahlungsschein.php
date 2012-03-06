@@ -1,40 +1,48 @@
 <?php
 
-/* ------------------------------------------------------------------------          
- * class.einzahlungsschein.php											
- * Eine Klasse um Einzahlungsscheine mit ESR-Nummer als PDF zu erstellen.
- * A class to create Swiss payment slips with ESR number in pdf format.
- * See http://sprain.ch/blog/downloads/class-esr-besr-einzahlungsschein-php/
- * ------------------------------------------------------------------------ 
- * Manuel Reinhard, manu@sprain.ch
- * Twitter: @sprain
- * Web: www.sprain.ch
- * ------------------------------------------------------------------------ 
- * License:
- * Use this for whatever you want. Private, public, commercial. I don't care.
- * However, be nice and give credits. I'll appreciate it!
- * ------------------------------------------------------------------------ 
- * Installation:
- * - Get FPDF http://fpdf.org/
- * - Get OCRB font http://sprain.ch/blog/wp-content/uploads/2010/04/OCRB_FPDFConverted.zip
- * - Move OCRB font files into the font folder of the FPDF class
- * - See example.php and get started
- * ------------------------------------------------------------------------ 
- * Thanks to:
- * http://www.smoke8.net/ for public designs of Einzahlungsscheinen
- * http://www.developers-guide.net/forums/5431,modulo10-rekursiv for Modulo10 function
- * http://ansuz.sooke.bc.ca/software/ocrb.php for OCRB font
- * http://blog.fruit-lab.de/fpdf-font-converter/ for FPDF font converter
- * http://www.fpdf.de/ for the pdf class
- * -----------------------------------------------------------------------
- * History:
- * 2011/12/22 - Manuel Reinhard - got rid of GNU license. Do whatever you want with it.
- * 2011/05/31 - Manuel Reinhard - improved behaviour of $this->ezs_bankingCustomerIdentification, minor bugfixes
- * 2011/02/14 - Manuel Reinhard - added project to Github, again
- * 2010/05/06 - Manuel Reinhard - added project to Github
- * 2010/05/06 - Manuel Reinhard - corrected position on bottom line after feedback from bank
- * 2010/04/24 - Manuel Reinhard - when it all started
- * ------------------------------------------------------------------------ */  
+namespace SPRAIN;
+/* ------------------------------------------------------------------------ */          
+/* 	class.einzahlungsschein.php												*/
+/*	Eine Klasse um Einzahlungsscheine mit ESR-Nummer als PDF zu erstellen.
+/*  A class to create Swiss payment slips with ESR number in pdf format.
+/* ------------------------------------------------------------------------ */
+/* Manuel Reinhard, manu@sprain.ch
+/* Twitter: @sprain
+/* Web: www.sprain.ch
+/* Beware, known for being one sandwich short of a picnic.
+/* ------------------------------------------------------------------------ 
+	Copyright (C) 2010-2011  Manuel Reinhard
+	
+	This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/* ------------------------------------------------------------------------ 
+    Thanks to:
+    http://www.smoke8.net/ for public designs of Einzahlungsscheinen
+    http://www.developers-guide.net/forums/5431,modulo10-rekursiv for Modulo10 function
+    http://ansuz.sooke.bc.ca/software/ocrb.php for OCRB font
+    http://blog.fruit-lab.de/fpdf-font-converter/ for FPDF font converter
+    http://www.fpdf.de/ for the pdf class
+    My mom, my dad and all my fans out there… you made me to who I am. Love you all!
+    *breaks down, has to be carried from stage*
+/* ------------------------------------------------------------------------ */
+/* History:
+/* 2011/05/31 - Manuel Reinhard - improved behaviour of $this->ezs_bankingCustomerIdentification, minor bugfixes
+/* 2011/02/14 - Manuel Reinhard - added project to Github, again
+/* 2010/05/06 - Manuel Reinhard - added project to Github
+/* 2010/05/06 - Manuel Reinhard - corrected position on bottom line after feedback from bank
+/* 2010/04/24 - Manuel Reinhard - when it all started
+/* ------------------------------------------------------------------------ */  
+
 
 
 /**************************************
@@ -45,7 +53,7 @@
  *
  * Adjust path if necessary.
  **************************************/
-require_once('fpdf/fpdf.php');
+require_once(__DIR__.'/fpdf/fpdf.php');
 
 
 /**************************************
@@ -54,7 +62,7 @@ require_once('fpdf/fpdf.php');
  * Otherwise the earth might disappear
  * in a large black hole. We'll blame you!
  **************************************/
-class createEinzahlungsschein {
+class Einzahlungsschein {
 
 	//margins in mm
 	private $marginTop = 0;
@@ -63,7 +71,7 @@ class createEinzahlungsschein {
 	//values on payment slip
 	private $ezs_bankName = "";
 	private $ezs_bankCity = "";
-	private $ezs_bankingAccount = "";
+	private $ezs_bankingAccount  = "";
 	
 	private $ezs_recipientName    = "";
 	private $ezs_recipientAddress = "";
@@ -187,12 +195,13 @@ class createEinzahlungsschein {
 	 */
 	 public function createEinzahlungsschein($doOutput=true, $displayImage=false, $fileName="", $saveAction=""){
 	 
+             
 	 	//Set basic stuff
 	 	if(!$this->pdf){
 	 		$this->pdf = new FPDF($this->landscapeOrPortrait,'mm',$this->format);
 			$this->pdf->AddPage();
-			$this->pdf->SetAutoPageBreak(margin,0);
-	 	}//if
+			$this->pdf->SetAutoPageBreak(0,0);
+	 	}
 	    
 	    
 	    //Place image
@@ -299,10 +308,14 @@ class createEinzahlungsschein {
 		
 		//Output
 		if($doOutput){
-			$this->pdf->Output($fileName, $saveAction);
-			if($fileName != ""){
-				return $fileName;
-			}//if
+			if ($saveAction =="S"){
+				return $this->pdf->Output($fileName, $saveAction);
+			}else{
+				$this->pdf->Output($fileName, $saveAction);
+				if($fileName != ""){
+					return $fileName;
+				}//if
+			}
 		}//if
 
 	 }//function
